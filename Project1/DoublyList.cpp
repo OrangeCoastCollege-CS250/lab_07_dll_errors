@@ -7,15 +7,19 @@ DoublyList::DoublyList()
 
 void DoublyList::insertBack(int newData)
 {
-	Node *newNode = new Node(newData, nullptr);
+	Node *newNode = new Node(newData, nullptr, nullptr);
 
-	if (first == nullptr)
+	if (first == nullptr) {
 		first = newNode;
+		last = newNode;
+	}
 	else
 	{
 		last->setNext(newNode);
 		newNode->setPrev(last);
+		last = newNode;
 	}
+	++count;
 }
 
 bool DoublyList::search(int searchData) const
@@ -24,11 +28,12 @@ bool DoublyList::search(int searchData) const
 
     while (current != nullptr)	
 	{		
-		if (current->getData() = searchData)
+		if (current->getData() == searchData)
 			return true;
         else
             current = current->getNext();	
 	}
+	return false;
 }
 
 void DoublyList::deleteNode(int deleteData) 
@@ -45,17 +50,20 @@ void DoublyList::deleteNode(int deleteData)
 		{	
 			first = first->getNext();	
 
-			if (first == nullptr)	
-				last = nullptr;				
+			if (first == nullptr)
+				last = nullptr;
+			else
+				first->setPrev(nullptr);
 
 			delete current;
 			current = nullptr;		
+			--count;
 		}
 		else 
 		{
 			bool found = false;								
 
-			while (current != nullptr || !found) 
+			while (current != nullptr && !found) 
 			{				  
 				if (current->getData() == deleteData) 
 					found = true;					  
@@ -67,10 +75,20 @@ void DoublyList::deleteNode(int deleteData)
 				cerr << "The item to be deleted is not in the list." << endl;
 			else         
 			{
-				if (current != last)		
-					current->getPrev()->setNext(current->getNext());
+				if (current == last)
+				{
+					last = current->getPrev();
+					last->setNext(nullptr);
+				}
+				else if (current == first) {
+					first = current->getNext();
+					first->setPrev(nullptr);
+				}
 				else
-					last = current->getPrev();			
+				{
+					current->getPrev()->setNext(current->getNext());
+					current->getNext()->setPrev(current->getPrev());
+				}					
 		
 				--count;
 				delete current;
@@ -80,14 +98,14 @@ void DoublyList::deleteNode(int deleteData)
 	}	
 }
 
-void print() const
+void DoublyList::print() const
 {
 	if (count == 0)
 		cerr << "List is empty. Cannot print." << endl;
 	else
 	{
 		Node *temp = first;
-		while (first != nullptr)
+		while (temp != nullptr)
 		{
 			cout << temp->getData() << " ";
 			temp = temp->getNext();
@@ -96,14 +114,14 @@ void print() const
 	}	
 }
 
-void DoublyList::reversePrint() 
+void DoublyList::reversePrint() const
 {
 	if (count == 0)
 		cerr << "List is empty. Cannot print." << endl;
 	else
 	{
 		Node *temp = last;
-		while (last != nullptr)
+		while (temp != nullptr)
 		{
 			cout << temp->getData() << " ";
 			temp = temp->getPrev();
